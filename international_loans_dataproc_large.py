@@ -49,7 +49,6 @@ dfDisbursement.repartition(1) \
     .mode("overwrite") \
     .format("csv") \
     .option("header", "true") \
-    .save("data/ibrd-loan-summary")\
     .save("gs://dataproc-demo-bucket/ibrd-loan-summary-large-python")
 
 print("Results successfully written to CSV file")
