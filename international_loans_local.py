@@ -49,6 +49,8 @@ dfDisbursement = spark.sql(
     "ORDER BY total_disbursement DESC)"
 )
 
+dfDisbursement.show(10, 100)
+
 # Saves results to a locally CSV file
 dfDisbursement.repartition(1) \
     .write \
