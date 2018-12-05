@@ -4,7 +4,7 @@ from pyspark.sql import SparkSession
 
 spark = SparkSession \
     .builder \
-    .master("yarn") \
+    .master("local[*]") \
     .appName('python-dataproc-demo') \
     .getOrCreate()
 
@@ -17,7 +17,8 @@ dfLoans = spark \
     .format("csv") \
     .option("header", "true") \
     .option("inferSchema", "true") \
-    .load("gs://dataproc-demo-bucket/ibrd-statement-of-loans-historical-data.csv")
+    .load("data/ibrd-statement-of-loans-latest-available-snapshot.csv")
+# .load("gs://dataproc-demo-bucket/ibrd-statement-of-loans-historical-data.csv")
 
 # Creates temporary view using DataFrame
 dfLoans.withColumnRenamed("Country", "country") \
@@ -49,7 +50,7 @@ dfDisbursement.repartition(1) \
     .mode("overwrite") \
     .format("csv") \
     .option("header", "true") \
-    .save("data/ibrd-loan-summary")\
-    .save("gs://dataproc-demo-bucket/ibrd-loan-summary-large-python")
+    .save("data/ibrd-loan-summary")
+# .save("gs://dataproc-demo-bucket/ibrd-loan-summary-large")
 
 print("Results successfully written to CSV file")
