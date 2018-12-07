@@ -54,3 +54,6 @@ dfDisbursement.repartition(1) \
     .save("gs://dataproc-demo-bucket/ibrd-loan-summary-large-python")
 
 print("Results successfully written to CSV file")
+
+
+spark.stop()

@@ -10,7 +10,7 @@ spark = SparkSession \
 
 # Defaults to INFO
 sc = spark.sparkContext
-sc.setLogLevel("WARN")
+sc.setLogLevel("INFO")
 
 # Loads CSV file from local directory
 dfLoans = spark \
