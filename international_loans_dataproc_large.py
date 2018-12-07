@@ -55,5 +55,4 @@ dfDisbursement.repartition(1) \
 
 print("Results successfully written to CSV file")
 
-
 spark.stop()
