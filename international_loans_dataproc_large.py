@@ -1,6 +1,9 @@
 #!/usr/bin/python
 
 from pyspark.sql import SparkSession
+from datetime import datetime
+
+print("*** Start job: " + str(datetime.now()))
 
 spark = SparkSession \
     .builder \
@@ -12,6 +15,8 @@ spark = SparkSession \
 sc = spark.sparkContext
 sc.setLogLevel("WARN")
 
+print("*** Start read data file: " + str(datetime.now()))
+
 # Loads CSV file from Google Storage Bucket
 dfLoans = spark \
     .read \
@@ -19,6 +24,8 @@ dfLoans = spark \
     .option("header", "true") \
     .option("inferSchema", "true") \
     .load("gs://dataproc-demo-bucket/ibrd-statement-of-loans-historical-data.csv")
+
+print("*** Start data analysis: " + str(datetime.now()))
 
 # Creates temporary view using DataFrame
 dfLoans.withColumnRenamed("Country", "country") \
@@ -34,16 +41,18 @@ dfDisbursement = spark.sql(
     "format_number(total_disbursement, 0) AS total_disbursement, " +
     "format_number(ABS(total_obligation), 0) AS total_obligation, " +
     "format_number(avg_interest_rate, 2) AS avg_interest_rate " +
-    "FROM (" +
+    "FROM ( " +
     "SELECT country, country_code, " +
     "SUM(disbursed) AS total_disbursement, " +
     "SUM(obligation) AS total_obligation, " +
-    "AVG(interest_rate) avg_interest_rate " +
+    "AVG(interest_rate) AS avg_interest_rate " +
     "FROM loans " +
     "GROUP BY country, country_code " +
     "ORDER BY total_disbursement DESC " +
     "LIMIT 25)"
 )
+
+print("*** Start write results: " + str(datetime.now()))
 
 # Saves results to single CSV file in Google Storage Bucket
 dfDisbursement.repartition(1) \
@@ -53,6 +62,6 @@ dfDisbursement.repartition(1) \
     .option("header", "true") \
     .save("gs://dataproc-demo-bucket/ibrd-loan-summary-large-python")
 
-print("Results successfully written to CSV file")
+print("*** Write results completed: " + str(datetime.now()))
 
 spark.stop()
