@@ -2,64 +2,70 @@
 
 from pyspark.sql import SparkSession
 
-spark = SparkSession \
-    .builder \
-    .master("local[*]") \
-    .appName('dataproc-python-demo') \
-    .getOrCreate()
 
-# Defaults to INFO
-sc = spark.sparkContext
-sc.setLogLevel("INFO")
+def main():
+    spark = SparkSession \
+        .builder \
+        .master("local[*]") \
+        .appName('dataproc-python-demo') \
+        .getOrCreate()
 
-# Loads CSV file from local directory
-dfLoans = spark \
-    .read \
-    .format("csv") \
-    .option("header", "true") \
-    .option("inferSchema", "true") \
-    .load("data/ibrd-statement-of-loans-latest-available-snapshot.csv")
+    # Defaults to INFO
+    sc = spark.sparkContext
+    sc.setLogLevel("INFO")
 
-# Basic stats
-print("Rows of data:", dfLoans.count())
-print("Inferred Schema:")
-dfLoans.printSchema()
+    # Loads CSV file from local directory
+    df_loans = spark \
+        .read \
+        .format("csv") \
+        .option("header", "true") \
+        .option("inferSchema", "true") \
+        .load("data/ibrd-statement-of-loans-latest-available-snapshot.csv")
 
-# Creates temporary view using DataFrame
-dfLoans.withColumnRenamed("Country", "country") \
-    .withColumnRenamed("Country Code", "country_code") \
-    .withColumnRenamed("Disbursed Amount", "disbursed") \
-    .withColumnRenamed("Borrower's Obligation", "obligation") \
-    .withColumnRenamed("Interest Rate", "interest_rate") \
-    .createOrReplaceTempView("loans")
+    # Prints basic stats
+    print("Rows of data:", df_loans.count())
+    print("Inferred Schema:")
+    df_loans.printSchema()
 
-# Performs basic analysis of dataset
-dfDisbursement = spark.sql(
-    "SELECT country, country_code, " +
-    "format_number(total_disbursement, 0) AS total_disbursement, " +
-    "format_number(ABS(total_obligation), 0) AS total_obligation, " +
-    "format_number(avg_interest_rate, 2) AS avg_interest_rate " +
-    "FROM ( " +
-    "SELECT country, country_code, " +
-    "SUM(disbursed) AS total_disbursement, " +
-    "SUM(obligation) AS total_obligation, " +
-    "AVG(interest_rate) AS avg_interest_rate " +
-    "FROM loans " +
-    "GROUP BY country, country_code " +
-    "ORDER BY total_disbursement DESC " +
-    "LIMIT 25)"
-)
+    # Creates temporary view using DataFrame
+    df_loans.withColumnRenamed("Country", "country") \
+        .withColumnRenamed("Country Code", "country_code") \
+        .withColumnRenamed("Disbursed Amount", "disbursed") \
+        .withColumnRenamed("Borrower's Obligation", "obligation") \
+        .withColumnRenamed("Interest Rate", "interest_rate") \
+        .createOrReplaceTempView("loans")
 
-dfDisbursement.show(25, 100)
+    # Performs basic analysis of dataset
+    df_disbursement = spark.sql(
+        "SELECT country, country_code, " +
+        "format_number(total_disbursement, 0) AS total_disbursement, " +
+        "format_number(ABS(total_obligation), 0) AS total_obligation, " +
+        "format_number(avg_interest_rate, 2) AS avg_interest_rate " +
+        "FROM ( " +
+        "SELECT country, country_code, " +
+        "SUM(disbursed) AS total_disbursement, " +
+        "SUM(obligation) AS total_obligation, " +
+        "AVG(interest_rate) AS avg_interest_rate " +
+        "FROM loans " +
+        "GROUP BY country, country_code " +
+        "ORDER BY total_disbursement DESC " +
+        "LIMIT 25)"
+    )
 
-# Saves results to a locally CSV file
-dfDisbursement.repartition(1) \
-    .write \
-    .mode("overwrite") \
-    .format("csv") \
-    .option("header", "true") \
-    .save("data/ibrd-loan-summary")
+    df_disbursement.show(25, 100)
 
-print("Results successfully written to CSV file")
+    # Saves results to a locally CSV file
+    df_disbursement.repartition(1) \
+        .write \
+        .mode("overwrite") \
+        .format("csv") \
+        .option("header", "true") \
+        .save("data/ibrd-loan-summary")
 
-spark.stop()
+    print("Results successfully written to CSV file")
+
+    spark.stop()
+
+
+if __name__ == "__main__":
+    main()
