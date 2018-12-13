@@ -64,7 +64,7 @@ def main(argv):
         "LIMIT 25)"
     )
 
-    df_disbursement.show(25, 100)
+    # df_disbursement.show(25, 100)
 
     # Saves results to single CSV file in Google Storage Bucket
     df_disbursement.write \

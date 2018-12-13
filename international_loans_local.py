@@ -66,7 +66,7 @@ def main():
         .option("header", "true") \
         .save("data/ibrd-loan-summary")
 
-    print "Results successfully written to CSV file" 
+    print "Results successfully written to CSV file"
 
     spark.stop()
 
