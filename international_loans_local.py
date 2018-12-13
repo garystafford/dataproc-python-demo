@@ -27,8 +27,8 @@ def main():
         .load("data/ibrd-statement-of-loans-latest-available-snapshot.csv")
 
     # Prints basic stats
-    print("Rows of data:", df_loans.count())
-    print("Inferred Schema:")
+    print "Rows of data:" + df_loans.count()
+    print "Inferred Schema:"
     df_loans.printSchema()
 
     # Creates temporary view using DataFrame
@@ -66,7 +66,7 @@ def main():
         .option("header", "true") \
         .save("data/ibrd-loan-summary")
 
-    print("Results successfully written to CSV file")
+    print "Results successfully written to CSV file" 
 
     spark.stop()
 
