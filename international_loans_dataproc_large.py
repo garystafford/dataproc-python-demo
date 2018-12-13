@@ -1,12 +1,13 @@
 #!/usr/bin/python
 
+# Author: Gary A. Stafford
+# License: MIT
+# Usage: python international_loans_dataproc_large.py
+
 from pyspark.sql import SparkSession
-from datetime import datetime
 
 
 def main():
-    print("*** Start job: " + str(datetime.now()))
-
     spark = SparkSession \
         .builder \
         .master("yarn") \
@@ -17,8 +18,6 @@ def main():
     sc = spark.sparkContext
     sc.setLogLevel("WARN")
 
-    print("*** Start read data file: " + str(datetime.now()))
-
     # Loads CSV file from Google Storage Bucket
     df_loans = spark \
         .read \
@@ -26,8 +25,6 @@ def main():
         .option("header", "true") \
         .option("inferSchema", "true") \
         .load("gs://dataproc-demo-bucket/ibrd-statement-of-loans-historical-data.csv")
-
-    print("*** Start data analysis: " + str(datetime.now()))
 
     # Creates temporary view using DataFrame
     df_loans.withColumnRenamed("Country", "country") \
@@ -54,8 +51,6 @@ def main():
         "LIMIT 25)"
     )
 
-    print("*** Start write results: " + str(datetime.now()))
-
     # Saves results to single CSV file in Google Storage Bucket
     df_disbursement.repartition(1) \
         .write \
@@ -63,8 +58,6 @@ def main():
         .format("csv") \
         .option("header", "true") \
         .save("gs://dataproc-demo-bucket/ibrd-loan-summary-large-python")
-
-    print("*** Write results completed: " + str(datetime.now()))
 
     spark.stop()
 

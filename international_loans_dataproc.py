@@ -2,34 +2,42 @@
 
 # Author: Gary A. Stafford
 # License: MIT
-# Usage: python international_loans_local.py
+# Usage:
+# python international_loans_dataproc.py \
+#     "gs://dataproc-demo-bucket" \
+#     "ibrd-statement-of-loans-historical-data.csv" \
+#     "ibrd-loan-summary-large-python"
+
 
 from pyspark.sql import SparkSession
+import sys
 
 
-def main():
+def main(argv):
+    storage_bucket = argv[0]
+    data_file = argv[1]
+    results_directory = argv[2]
+
+    print "Number of arguments: {0} arguments.".format(len(sys.argv))
+    print "Argument List: {0}".format(str(sys.argv))
+
     spark = SparkSession \
         .builder \
-        .master("local[*]") \
+        .master("yarn") \
         .appName('dataproc-python-demo') \
         .getOrCreate()
 
     # Defaults to INFO
     sc = spark.sparkContext
-    sc.setLogLevel("INFO")
+    sc.setLogLevel("WARN")
 
-    # Loads CSV file from local directory
+    # Loads CSV file from Google Storage Bucket
     df_loans = spark \
         .read \
         .format("csv") \
         .option("header", "true") \
         .option("inferSchema", "true") \
-        .load("data/ibrd-statement-of-loans-latest-available-snapshot.csv")
-
-    # Prints basic stats
-    print("Rows of data:", df_loans.count())
-    print("Inferred Schema:")
-    df_loans.printSchema()
+        .load(storage_bucket + "/" + data_file)
 
     # Creates temporary view using DataFrame
     df_loans.withColumnRenamed("Country", "country") \
@@ -58,18 +66,14 @@ def main():
 
     df_disbursement.show(25, 100)
 
-    # Saves results to a locally CSV file
-    df_disbursement.repartition(1) \
-        .write \
+    # Saves results to single CSV file in Google Storage Bucket
+    df_disbursement.write \
         .mode("overwrite") \
-        .format("csv") \
-        .option("header", "true") \
-        .save("data/ibrd-loan-summary")
-
-    print("Results successfully written to CSV file")
+        .format("parquet") \
+        .save(storage_bucket + "/" + results_directory)
 
     spark.stop()
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv[1:])
