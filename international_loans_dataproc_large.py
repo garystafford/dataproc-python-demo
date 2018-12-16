@@ -56,7 +56,7 @@ def main():
         .mode("overwrite") \
         .format("csv") \
         .option("header", "true") \
-        .save("gs://dataproc-demo-bucket/ibrd-loan-summary-large-python")
+        .save("gs://dataproc-demo-bucket/ibrd-summary-large-python")
 
     spark.stop()
 

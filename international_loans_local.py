@@ -63,7 +63,7 @@ def main():
         .mode("overwrite") \
         .format("csv") \
         .option("header", "true") \
-        .save("data/ibrd-loan-summary")
+        .save("data/ibrd-summary-small-python")
 
     print "Results successfully written to CSV file"
 

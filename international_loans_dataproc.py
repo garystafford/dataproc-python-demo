@@ -5,7 +5,7 @@
 # Arguments Example:
 # gs://dataproc-demo-bucket
 # ibrd-statement-of-loans-historical-data.csv
-# ibrd-loan-summary-large-python
+# ibrd-summary-large-python
 
 from pyspark.sql import SparkSession
 import sys
